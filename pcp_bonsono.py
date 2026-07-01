@@ -22,11 +22,6 @@ import dash_bootstrap_components as dbc
 from datetime import date
 
 # ── Configuração ───────────────────────────────────────────────────
-# Arquivos locais usados apenas como carga inicial automática quando
-# rodando no seu computador (opcional). Em produção (nuvem) eles não
-# existirão e o painel vai aguardar o upload manual pela tela.
-ARQUIVO_CABECALHO  = "Cabecalho_da_Nota.xlsx"
-ARQUIVO_ITENS      = "Resultado_da_Query.xlsx"
 ARQUIVO_EXCLUIDOS  = "pedidos_excluidos.json"
 SKIPROWS           = 2
 # ──────────────────────────────────────────────────────────────────
@@ -114,20 +109,6 @@ def df_from_json(data_json: str) -> pd.DataFrame:
     return df
 
 
-def carregar_dados_locais():
-    """Tenta carregar os arquivos da pasta local (uso apenas em
-    desenvolvimento). Retorna None se não encontrar."""
-    cab_path = BASE / ARQUIVO_CABECALHO
-    it_path  = BASE / ARQUIVO_ITENS
-    if not cab_path.exists() or not it_path.exists():
-        return None
-    try:
-        cab = pd.read_excel(cab_path, skiprows=SKIPROWS)
-        it  = pd.read_excel(it_path,  skiprows=SKIPROWS)
-        return processar_dados(cab, it)
-    except Exception:
-        return None
-
 
 CORES_GRUPO = {
     "CAMA BOX":              "#378ADD",
@@ -165,12 +146,11 @@ def grafico_vazio(texto):
     )
     return fig
 
-# ── Carga inicial (só funciona localmente, se os arquivos existirem) ─
-df_inicial = carregar_dados_locais()
-DADOS_INICIAIS = df_to_json(df_inicial) if df_inicial is not None else None
-REGIOES_INICIAIS  = sorted(df_inicial["REGIAO"].dropna().unique())     if df_inicial is not None else []
-GRUPOS_INICIAIS   = sorted(df_inicial["GRUPO_PROD"].dropna().unique()) if df_inicial is not None else []
-TIPOS_INICIAIS    = sorted(df_inicial["TIPO_OP"].dropna().unique())    if df_inicial is not None else []
+# ── Carga inicial: o painel sempre começa em branco, aguardando upload ─
+DADOS_INICIAIS    = None
+REGIOES_INICIAIS  = []
+GRUPOS_INICIAIS   = []
+TIPOS_INICIAIS    = []
 
 UPLOAD_STYLE = {
     "width": "100%", "height": "54px", "lineHeight": "54px",
